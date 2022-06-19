@@ -1,0 +1,1 @@
+/home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/target/wasm32-unknown-unknown/release/matrix_rain_wasm.wasm: /home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/src/RobotoMono-Regular.ttf /home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/src/SongMyung-Regular.ttf /home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/src/lib.rs

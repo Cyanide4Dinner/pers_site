@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/target/rls/debug/build/typenum-ac05385cff7c2a5e/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/utkarsh_arch/Projects/cfd/pers_site/matrix_rain_wasm/target/rls/debug/build/typenum-ac05385cff7c2a5e/out/op.rs
