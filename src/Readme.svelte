@@ -1,27 +1,48 @@
-<div id="readme-container">
+<script>
+function getMobileWidth() {
+	if(window.innerWidth > 600) {
+		return "506px"
+	} else {
+		return "306px";
+	}
+}
+</script>
+
+<div id="readme-container"
+	class="{window.innerWidth < 1200 ? 'readme-container-mobile' : 'readme-container-desktop'}"
+	style="width: {window.innerWidth < 1200 ? getMobileWidth() : "40vw"}"
+>
 	<div id="readme-heading-container">
 		<span><b>README.md</b></span>
 	</div>
 	<div id="readme-content-container">
 		<span>
-			Computer Science major passionate about diverse areas of the field. Skilled in distributed and cloud architectures, databases and developing performant solutions for backend. Also interested in low-level programming using C and Rust. Graduating in July 2022.
+			Computer Science major passionate about diverse areas of the field. 
+			Skilled in distributed and cloud architectures, databases and developing performant solutions for backend. Also interested in low-level programming using C and Rust. Graduating in July 2022.
+			Computer Science major passionate about diverse areas of the field. 
+			Skilled in distributed and cloud architectures, databases and developing performant solutions for backend. Also interested in low-level programming using C and Rust. Graduating in July 2022.
+			Computer Science major passionate about diverse areas of the field. 
+			Skilled in distributed and cloud architectures, databases and developing performant solutions for backend. Also interested in low-level programming using C and Rust. Graduating in July 2022.
 		</span>
-		<br>
-		<br>
-		<br>
-		<br>
 	</div>
 </div>
 
 <style>
 #readme-container {
-	position: absolute;
+	position: relative;
 	z-index: 2;
-	top: 10px;
-	right: 10px;
-	background-color: blue;
-	width: 400px;
+	background-color: #000000;
+}
+
+.readme-container-desktop {
+	width: 40vw;
+	font-size: 1vw;
 	border: medium solid #00FF0C;
+}
+
+.readme-container-mobile {
+	font-size: 0.8rem;
+	border: solid #00FF0C;
 }
 
 #readme-heading-container, #readme-content-container {
@@ -34,7 +55,6 @@
 }
 
 #readme-content-container {
-	background-color: #000000;
 	color: #00FF0C;
 }
 </style>

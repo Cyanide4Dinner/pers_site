@@ -24,6 +24,14 @@ pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
 }
 
+static mut WASM_MEM: u8 = 0;
+#[wasm_bindgen]
+pub fn store_value_in_wasm_mem(value: u8) {
+  unsafe {
+    WASM_MEM = value;
+  }
+}
+
 const REF_IMG_DATA: [[u8; 50]; 53] = [
 [0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0],
 [0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0],
@@ -140,6 +148,37 @@ pub fn start() {
     let low_res_width = 50;
     let low_res_height = 52;
 
+    let mut portrait_block_size: u32 = 15;
+    let mut matrix_bg_block_size_small: u32 = 15;
+    let mut matrix_bg_block_size_big: u32 = 20;
+    let mut scale_factor_nor: f32 = 1.3;
+    let mut scale_factor_kor: f32 = 1.0;
+
+    if width < 600 {
+        portrait_block_size = 6;
+        scale_factor_kor = 0.6;
+        scale_factor_nor = 0.8;
+    } else if width >= 600 && width < 1200 {
+        portrait_block_size = 10;
+        scale_factor_kor = 0.8;
+        scale_factor_nor = 1.0;
+    } else if width >= 1200 && width < 1900 {
+        portrait_block_size = 10;
+        scale_factor_kor = 0.8;
+        scale_factor_nor = 1.0;
+    } else if width >= 1900 && width < 2500 {
+        portrait_block_size = 15;
+    } else if width >= 2500 && width < 3800 {
+        scale_factor_nor = 1.3;
+        portrait_block_size = 20;
+    } else if width >= 3800 {
+        scale_factor_nor = 1.5;
+        portrait_block_size = 30;
+        matrix_bg_block_size_small = 40;
+        matrix_bg_block_size_big = 40;
+    }
+    mat_set_1.block_size = matrix_bg_block_size_small;
+    mat_set_2.block_size = matrix_bg_block_size_big;
 
     animate_limited(move || {
 
@@ -153,15 +192,14 @@ pub fn start() {
         }
 
         {
-            let portrait_block_size = 15;
             let mut img_3 = RgbaImage::new(low_res_width * portrait_block_size, low_res_height * portrait_block_size);
             ctx_hoodie.clear_rect(0.0, 0.0, (low_res_width * portrait_block_size) as f64, (low_res_height * portrait_block_size) as f64);
-            create_portrait(&mut mat_set_1, &mut img_3, low_res_width, low_res_height, &trail_data, &ref_trail_rands_1, green_2, portrait_block_size);
+            create_portrait(&mut mat_set_1, &mut img_3, low_res_width, low_res_height, &trail_data, &ref_trail_rands_1, green_2, portrait_block_size, scale_factor_nor, scale_factor_kor);
             let img_data: web_sys::ImageData = web_sys::ImageData::new_with_u8_clamped_array(wasm_bindgen::Clamped(img_3.as_raw()), low_res_width * portrait_block_size).unwrap();
             ctx_hoodie.put_image_data(&img_data, 0.0, 0.0).unwrap();
         }
 
-    }, 1, )
+    }, 5)
 }
 
 fn create_portrait(
@@ -173,9 +211,12 @@ fn create_portrait(
         trail_rands: &Vec<i32>,
         green: [u8; 3],
         block_size: u32,
+        scale_factor_nor: f32,
+        scale_factor_kor: f32
         ) {
 
-    console::log_1(&"Draw portrait called".into());
+    // console::log_1(&"Draw portrait called".into());
+    // unsafe { console::log_1(&WASM_MEM.into()); }
     draw_filled_rect_mut(img, Rect::at(0, 0).of_size(block_size * low_res_width, block_size * low_res_height), Rgba::from([0, 0, 0, 255]));
 
     for i in 0..low_res_width {
@@ -183,21 +224,22 @@ fn create_portrait(
         let font_scale: Scale;
         let font_data: &[u32; 10];
         let mut font_offset: i32 = 0;
+
         match (trail_rands[i as usize % trail_rands.len()]) % 4 {
             0 => { 
                 font = &mat_set.kor_font;
-                font_scale = Scale { x: mat_set.block_size as f32, y: mat_set.block_size as f32 };
+                font_scale = Scale { x: mat_set.block_size as f32 * scale_factor_kor, y: mat_set.block_size as f32 * scale_factor_kor};
                 font_data = &trail_data.kor_data[0];
             },
             1 => { 
                 font = &mat_set.eng_font;
-                font_scale = Scale { x: mat_set.block_size as f32 * 1.3, y: mat_set.block_size as f32 * 1.3 };
+                font_scale = Scale { x: mat_set.block_size as f32 * scale_factor_nor, y: mat_set.block_size as f32 * scale_factor_nor };
                 font_data = &trail_data.eng_data[0];
                 font_offset = (block_size / 4) as i32;
             },
             _ => { 
                 font = &mat_set.num_font;
-                font_scale = Scale { x: mat_set.block_size as f32 * 1.3, y: mat_set.block_size as f32 * 1.3 };
+                font_scale = Scale { x: mat_set.block_size as f32 * scale_factor_nor, y: mat_set.block_size as f32 * scale_factor_nor };
                 font_data = &trail_data.num_data[0];
                 font_offset = (block_size / 4) as i32;
             }
@@ -246,6 +288,7 @@ fn window() -> web_sys::Window {
 }
 
 fn request_animation_frame(window: &web_sys::Window, f: &Closure<dyn FnMut()>) -> i32 {
+    unsafe { if WASM_MEM != 0 { panic!("Resized"); } }
     window
         .request_animation_frame(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK")
